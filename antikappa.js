@@ -15,7 +15,8 @@ var AntiKappa = {
 
     //CHANGE SETTINGS HERE
     r9kModeBool: true, //personal twitch r9k
-    blockUpperCaseBool: true, //removes exclusive caps lock 
+    blockExclusiveUpperCaseBool: true, //removes exclusive caps lock 
+    blockMostlyUpperCaseBool: true,
     blockVeryLongMessagesBool: false, //removes long messages which usually contains repetitive copy pastes
     blockRepeatedWordInSentenceBool: true, //removes repeated words, like "Kappa Kappa Kappa"
     blockTypicalSpamBool: true, //removes suspected random spam
@@ -25,6 +26,7 @@ var AntiKappa = {
     messageArray: [],
     debugModeBool: true,
     longMessageCountInt: 140,
+    mostlyUpperCaseTheshholdPercentage: 70,
     repeatedWordInSentenceCountInt: 3,
     typicalSpamStringArray: [ //will block the sentence if it contains any of these words, and you have "blockTypicalSpamBool" set to true
         "gachi", "feelsgoodman", "feelsbadman", "kkona", 
@@ -104,8 +106,14 @@ $(document).ready(function(){
                 return true;
             }
         }
+        
+        if(AntiKappa.blockMostlyUpperCaseBool){
+            if(AntiKappa.isMostlyUpperCase(text)){
+               return true;
+            }
+        }
 
-        if(AntiKappa.blockUpperCaseBool){
+        if(AntiKappa.blockExclusiveUpperCaseBool){
             if(text === text.toUpperCase()){
                 return true;
             }             
@@ -148,8 +156,23 @@ $(document).ready(function(){
                 duplicatesStringArray.push(sortedStringArray[i]);
             }
         }
-
+        
         return duplicatesStringArray.length >= AntiKappa.repeatedWordInSentenceCountInt;
+    };
+    
+    AntiKappa.isMostlyUpperCase = function(text){
+        var textLength = text.length;
+        var amountUpperCaseInt = 0;
+        for (var i = 0, len = textLength; i < len; i++) {
+            var char = text[i];
+            if(char === char.toUpperCase()){
+                amountUpperCaseInt++;
+            }
+        }
+        
+        var percentageUpperCase = 100 - (textLength - amountUpperCaseInt) / textLength * 100;
+        
+        return percentageUpperCase >= AntiKappa.mostlyUpperCaseTheshholdPercentage;
     };
 
     AntiKappa.isNonEnglishCharacter = function(text){
