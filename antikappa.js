@@ -2,12 +2,11 @@
 // ==UserScript==
 // @name         AntiKappa - Remove chat spam from Twitch.tv
 // @namespace    http://tampermonkey.net/
-// @version      0.82
+// @version      0.86
 // @description  Removes repetitive spam from Twitch.tv. Includes personal r9k mode, and removes caps lock, ascii, repetitive text if you want (and more). 
 // @author       BlackOdd (Reddit: /u/BlackOdder)
 // @include      http*://www.twitch.tv*
 // @grant        none
-// @require      http://code.jquery.com/jquery-latest.js
 // ==/UserScript==
 /* jshint -W097 */
 
@@ -16,7 +15,7 @@ var AntiKappa = {
     //CHANGE SETTINGS HERE
     r9kModeBool: true, //personal twitch r9k
     blockExclusiveUpperCaseBool: true, //removes exclusive caps lock 
-    blockMostlyUpperCaseBool: true,
+    blockMostlyUpperCaseBool: true, //blocks messages with mostly caps lock
     blockVeryLongMessagesBool: false, //removes long messages which usually contains repetitive copy pastes
     blockRepeatedWordInSentenceBool: true, //removes repeated words, like "Kappa Kappa Kappa"
     blockTypicalSpamBool: true, //removes suspected random spam
@@ -31,9 +30,10 @@ var AntiKappa = {
     typicalSpamStringArray: [ //will block the sentence if it contains any of these words, and you have "blockTypicalSpamBool" set to true
         "gachi", "feelsgoodman", "feelsbadman", "kkona", 
     ],
+    betterTTVEnabled: false
 };
 
-$(document).ready(function(){  
+$(function(){  
     'use strict';
 
     AntiKappa.logDebugMessage = function(message){        
@@ -44,19 +44,28 @@ $(document).ready(function(){
 
     AntiKappa.mainLoop = function(){
         //AntiKappa.logDebugMessage('mainLoop'); 
+        
+        AntiKappa.betterTTVEnabled = AntiKappa.isBetterTTVEnabled();        
         AntiKappa.checkMessages();
         AntiKappa.cleanUp();
     };
+    
+    AntiKappa.isBetterTTVEnabled = function(){
+        return $('.bttvChatSettings').length > 0;
+    }
 
     AntiKappa.checkMessages = function(){
-        //AntiKappa.logDebugMessage('addMessages');                
         $('ul.chat-lines span.message:not(.AntiKappaAccepted)').each(function(){            
             var $message = $(this);
-            var $parent = $(this).parent().parent();
-            //var text = AntiKappa.translateEmoticonsAndReturnTextFromMessage($message).trim();
+            var $parent = null;
+            if(AntiKappa.betterTTVEnabled){
+                $parent = $(this).parent();
+            }
+            else{
+                $parent = $(this).parent().parent();
+            }
+
             var textWithoutEmotes = $message.text();
-            
-            //AntiKappa.checkMessage(text, $message, $parent);
             AntiKappa.checkMessage(textWithoutEmotes, $message, $parent);
         });
     };
@@ -65,7 +74,7 @@ $(document).ready(function(){
         if(!AntiKappa.isSpam(text)){
             AntiKappa.logDebugMessage('ACCEPTED: ' + text);
 
-            $message.addClass('AntiKappaAccepted');
+            $message.addClass('AntiKappaAccepted');            
             $parent.addClass('AntiKappaAccepted');
             AntiKappa.messageArray.push(text);                        
         }
@@ -191,8 +200,10 @@ $(document).ready(function(){
     };
 
     AntiKappa.addGlobalStyle('.chat-lines div.ember-view { display: none; }');
-    AntiKappa.addGlobalStyle('.AntiKappaAccepted { display: inline !important; }');
-    AntiKappa.addGlobalStyle('.player-hover { display: block !important; }');
+    AntiKappa.addGlobalStyle('.chat-lines div.chat-line { display: none; }'); 
+    AntiKappa.addGlobalStyle('.AntiKappaAccepted { display: block !important; }');    
+    AntiKappa.addGlobalStyle('li.ember-view span.AntiKappaAccepted { display: inline !important; }');    
+    AntiKappa.addGlobalStyle('div.chat-line span.AntiKappaAccepted { display: inline !important; }');    
     setInterval(AntiKappa.mainLoop, 200);    
     setInterval(AntiKappa.purgeEntries, 1000 * 60 * 10);
 });
