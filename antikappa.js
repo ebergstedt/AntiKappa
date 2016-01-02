@@ -2,7 +2,7 @@
 // ==UserScript==
 // @name         AntiKappa - Remove chat spam from Twitch.tv
 // @namespace    http://tampermonkey.net/
-// @version      0.86
+// @version      0.87
 // @description  Removes repetitive spam from Twitch.tv. Includes personal r9k mode, and removes caps lock, ascii, repetitive text if you want (and more). 
 // @author       BlackOdd (Reddit: /u/BlackOdder)
 // @include      http*://www.twitch.tv*
@@ -107,28 +107,33 @@ $(function(){
 
     AntiKappa.isSpam = function(text){        
         if(text === ""){
+            AntiKappa.logDebugMessage("Reason for removal: empty");
             return true;
         }
 
         if(AntiKappa.blockVeryLongMessagesBool){
-            if(text.length > AntiKappa.longMessageCountInt){
+            if(text.length > AntiKappa.longMessageCountInt){                
+                AntiKappa.logDebugMessage("Reason for removal: VeryLong");
                 return true;
             }
         }
         
         if(AntiKappa.blockMostlyUpperCaseBool){
             if(AntiKappa.isMostlyUpperCase(text)){
+               AntiKappa.logDebugMessage("Reason for removal: MostlyUpperCase");
                return true;
             }
         }
 
         if(AntiKappa.blockExclusiveUpperCaseBool){
             if(text === text.toUpperCase()){
+                AntiKappa.logDebugMessage("Reason for removal: ExclusiveUpperCase");
                 return true;
             }             
         }        
 
         if(AntiKappa.blockRepeatedWordInSentenceBool && AntiKappa.isRepeatedWordInSentence(text)){
+            AntiKappa.logDebugMessage("Reason for removal: RepeatedWordInSentence");
             return true;
         }
 
@@ -137,6 +142,7 @@ $(function(){
                 var entry = AntiKappa.typicalSpamStringArray[i].toUpperCase();
                 var compare = text.toUpperCase();
                 if(compare.indexOf(entry) > -1){
+                    AntiKappa.logDebugMessage("Reason for removal: TypicalSpam");
                     return true;
                 }
             }
@@ -144,12 +150,14 @@ $(function(){
 
         if(AntiKappa.r9kModeBool){
             if(AntiKappa.messageArray.indexOf(text) > -1){
+                AntiKappa.logDebugMessage("Reason for removal: r9kMode");
                 return true;
             }                
         }                
 
         if(AntiKappa.blockNonEnglishCharactersBool){
             if(AntiKappa.isNonEnglishCharacter(text)){
+                AntiKappa.logDebugMessage("Reason for removal: NonEnglishCharacter");
                 return true;
             }                
         }             
@@ -165,6 +173,8 @@ $(function(){
                 duplicatesStringArray.push(sortedStringArray[i]);
             }
         }
+        
+        duplicatesStringArray = duplicatesStringArray.filter(Boolean);
         
         return duplicatesStringArray.length >= AntiKappa.repeatedWordInSentenceCountInt;
     };
@@ -200,7 +210,7 @@ $(function(){
     };
 
     AntiKappa.addGlobalStyle('.chat-lines div.ember-view { display: none; }');
-    AntiKappa.addGlobalStyle('.chat-lines div.chat-line { display: none; }'); 
+    AntiKappa.addGlobalStyle('.chat-lines div.chat-line { display: none; }'); //BetterTTV
     AntiKappa.addGlobalStyle('.AntiKappaAccepted { display: block !important; }');    
     AntiKappa.addGlobalStyle('li.ember-view span.AntiKappaAccepted { display: inline !important; }');    
     AntiKappa.addGlobalStyle('div.chat-line span.AntiKappaAccepted { display: inline !important; }');    
