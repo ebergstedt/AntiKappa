@@ -2,7 +2,7 @@
 // ==UserScript==
 // @name         AntiKappa - Remove chat spam from Twitch.tv
 // @namespace    http://tampermonkey.net/
-// @version      0.88
+// @version      0.89
 // @description  Removes repetitive spam from Twitch.tv. Includes personal r9k mode, and removes caps lock, ascii, repetitive text if you want (and more). 
 // @author       BlackOdd (Reddit: /u/BlackOdder)
 // @include      http*://www.twitch.tv*
@@ -160,7 +160,7 @@ $(function(){
         var sortedStringArray = text.split(" ").sort();        
         var duplicatesStringArray = [];
         for (var i = 0; i < sortedStringArray.length - 1; i++) {
-            if (sortedStringArray[i + 1] == sortedStringArray[i]) {
+            if (sortedStringArray[i + 1] == sortedStringArray[i] && sortedStringArray[i].length > 3) { //dont take short words like "at", "a", "or" etc because they can be repeated a lot but are not spam per say
                 duplicatesStringArray.push(sortedStringArray[i]);
             }
         }
