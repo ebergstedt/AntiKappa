@@ -2,7 +2,7 @@
 // ==UserScript==
 // @name         AntiKappa - Remove chat spam from Twitch.tv
 // @namespace    http://tampermonkey.net/
-// @version      0.87
+// @version      0.88
 // @description  Removes repetitive spam from Twitch.tv. Includes personal r9k mode, and removes caps lock, ascii, repetitive text if you want (and more). 
 // @author       BlackOdd (Reddit: /u/BlackOdder)
 // @include      http*://www.twitch.tv*
@@ -43,11 +43,8 @@ $(function(){
     };
 
     AntiKappa.mainLoop = function(){
-        //AntiKappa.logDebugMessage('mainLoop'); 
-        
         AntiKappa.betterTTVEnabled = AntiKappa.isBetterTTVEnabled();        
         AntiKappa.checkMessages();
-        AntiKappa.cleanUp();
     };
     
     AntiKappa.isBetterTTVEnabled = function(){
@@ -65,7 +62,7 @@ $(function(){
                 $parent = $(this).parent().parent();
             }
 
-            var textWithoutEmotes = $message.text();
+            var textWithoutEmotes = $message.text(); //filter out emotes, since a lot of spam is on the form "*emote* CAPSLOCK". this makes it easier to identify capslock spam
             AntiKappa.checkMessage(textWithoutEmotes, $message, $parent);
         });
     };
@@ -97,12 +94,6 @@ $(function(){
 
     AntiKappa.purgeEntries = function(){
         AntiKappa.messageArray = [];
-    };
-
-    AntiKappa.cleanUp = function(){
-        $('span.deleted').each(function(){
-            $(this).parent().parent().remove();
-        });
     };
 
     AntiKappa.isSpam = function(text){        
