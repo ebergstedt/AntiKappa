@@ -4,7 +4,7 @@
 // @namespace    http://tampermonkey.net/
 // @version      0.89
 // @description  Removes repetitive spam from Twitch.tv. Includes personal r9k mode, and removes caps lock, ascii, repetitive text if you want (and more). 
-// @author       BlackOdd (Reddit: /u/BlackOdder)
+// @author       
 // @include      http*://www.twitch.tv*
 // @grant        none
 // ==/UserScript==
